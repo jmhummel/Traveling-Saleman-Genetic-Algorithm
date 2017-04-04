@@ -1,0 +1,9 @@
+api_keys:
+    # https://developers.google.com/maps/documentation/static-maps/
+    google_static_maps: YOURKEYHERE
+    # https://developers.google.com/maps/documentation/distance-matrix/
+    google_distance_matrix: YOURKEYHERE
+    # https://developers.google.com/maps/documentation/directions/
+    google_directions: YOURKEYHERE
+    # https://developers.google.com/maps/documentation/geocoding/
+    google_geocoding: YOURKEYHERE
