@@ -1,6 +1,8 @@
 # Traveling-Saleman-Genetic-Algorithm
 *Solving the Traveling Salesman problem with 49 US Capitals using a genetic algorithm*
 
+![Best solution](http://i.imgur.com/NOefVF7.png)
+
 Video of the solution evolving over time: https://www.youtube.com/watch?v=7KCLMNRRPN0
 
 This solver utilizes several Google Map APIs: 
