@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import multiprocessing
 import pickle
 import random
 import operator
 import time
 import sys
+import itertools
 
 import maputils
 
@@ -24,7 +26,8 @@ def getDistDur(origin, destination):
 	else:
 		raise Exception('Not found in cache') 
 
-NUM_POP = 100
+# NUM_POP = 100
+NUM_POP = 10000
 NUM_SEEDS = NUM_POP
 
 def init():
@@ -161,8 +164,8 @@ def mutate(chromosome):
 		chromosome = list(reversed(chromosome[:length])) + chromosome[length:]
 
 ITERATIONS = 100000
-MAX_DURATION = 2000000
-# MAX_DURATION = 0
+# MAX_DURATION = 2000000
+MAX_DURATION = 0
 
 def ga():
 	startTime = time.time()
@@ -171,6 +174,7 @@ def ga():
 	routes = init()
 	stats = []
 	loop = 0
+	pool = multiprocessing.Pool(multiprocessing.cpu_count())
 	while bestRoute is None or bestDur > MAX_DURATION:
 		routes = [ deDup(route) for route in routes ]
 		durationMap = {}
@@ -179,7 +183,9 @@ def ga():
 
 		fitnessMap = normalize(durationMap)
 
+
 		if (USE_STOCHASTIC_SELECT):
+			accumulatedFitnessList = None
 			shortestRoute = min(durationMap.items(), key=operator.itemgetter(1))[0]
 		else:
 			accumulatedFitnessList = calcAccumulatedFitness(fitnessMap)
@@ -195,29 +201,39 @@ def ga():
 			print stats[-1]
 		
 		# print '\n'.join(stats)
+		
+		
+		# args1 = [fitnessMap for i in xrange(NUM_POP / 2)]
+		# args2 = [accumulatedFitnessList for i in xrange(NUM_POP / 2)]
+		args = [(fitnessMap, accumulatedFitnessList) for i in xrange(NUM_POP / 2)]
+		routes = list(itertools.chain.from_iterable(pool.map(worker, args)))
+
 		if USE_ELITISM:
-			routes = [bestRoute]
-		else:
-			routes = []
-		for i in xrange(NUM_POP / 2):
-			if (USE_STOCHASTIC_SELECT):
-				mate1 = stochasticSelect(fitnessMap)
-				mate2 = stochasticSelect(fitnessMap)
-			else:
-				mate1 = select(accumulatedFitnessList)
-				mate2 = select(accumulatedFitnessList)
-			offspring = orderedCrossover(mate1, mate2)
-			offspring1 = offspring[0]
-			offspring2 = offspring[1]
-			mutate(offspring1)
-			mutate(offspring2)
-			routes.append(offspring1)
-			routes.append(offspring2)
+			routes.append(bestRoute)
+
 		loop += 1
 	# print '\n'.join(stats)
 	# print stats[-1]
 	# print [CAPITALS[i] for i in bestRoute]
 	return time.time() - startTime
+	pool.close()
+	pool.join()
+
+def worker(args):
+	fitnessMap = args[0]
+	accumulatedFitnessList = args[1]
+	if (USE_STOCHASTIC_SELECT):
+		mate1 = stochasticSelect(fitnessMap)
+		mate2 = stochasticSelect(fitnessMap)
+	else:
+		mate1 = select(accumulatedFitnessList)
+		mate2 = select(accumulatedFitnessList)
+	offspring = orderedCrossover(mate1, mate2)
+	offspring1 = offspring[0]
+	offspring2 = offspring[1]
+	mutate(offspring1)
+	mutate(offspring2)
+	return (offspring1, offspring2)
 
 NUMBER_OF_TESTS = 20
 def test():
