@@ -7,6 +7,7 @@ import operator
 import time
 import sys
 import itertools
+import numpy
 
 import maputils
 
@@ -26,25 +27,29 @@ def getDistDur(origin, destination):
 	else:
 		raise Exception('Not found in cache') 
 
-# NUM_POP = 100
-NUM_POP = 10000
+NUM_POP = 100
+# NUM_POP = 1000
 NUM_SEEDS = NUM_POP
+POOL_SIZE = multiprocessing.cpu_count()
+# POOL_SIZE = 1
+# NUM_CAPITALS = 9
+NUM_CAPITALS = len(CAPITALS)
 
 def init():
 	seeds = []
 	for i in xrange(NUM_SEEDS):
-		r = range(0, len(CAPITALS))
-		# r = range(0, 16) # Test using only 5 capitals to speed up, and reduce api calls
+		r = range(NUM_CAPITALS)
 		random.shuffle(r)
 		seeds.append(r)
 	return seeds
 
 def deDup(route):
+	route = tuple(route)
 	idx = route.index(0)
 	route = route[idx:] + route[:idx]
 	if route[-1] < route[1]:
-		return tuple(route[:1] + list(reversed(route[1:])))
-	return tuple(route)
+		return route[:1] + tuple(reversed(route[1:]))
+	return route
 
 def calcDuration(route):
 	route = tuple(route)
@@ -164,7 +169,7 @@ def mutate(chromosome):
 		chromosome = list(reversed(chromosome[:length])) + chromosome[length:]
 
 ITERATIONS = 100000
-# MAX_DURATION = 2000000
+# MAX_DURATION = 2500000
 MAX_DURATION = 0
 
 def ga():
@@ -174,15 +179,22 @@ def ga():
 	routes = init()
 	stats = []
 	loop = 0
-	pool = multiprocessing.Pool(multiprocessing.cpu_count())
+	durationMap = {}
+	routes = [ deDup(route) for route in routes ]
+	for route in routes:
+		durationMap[tuple(route)] = calcDuration(route)
+
+	pool = multiprocessing.Pool(POOL_SIZE)
+
 	while bestRoute is None or bestDur > MAX_DURATION:
-		routes = [ deDup(route) for route in routes ]
-		durationMap = {}
-		for route in routes:
-			durationMap[tuple(route)] = calcDuration(route)
+		# routes = [ deDup(route) for route in routes ]
+		
+		# for route in routes:
+		# 	durationMap[tuple(route)] = calcDuration(route)
+
+
 
 		fitnessMap = normalize(durationMap)
-
 
 		if (USE_STOCHASTIC_SELECT):
 			accumulatedFitnessList = None
@@ -206,7 +218,9 @@ def ga():
 		# args1 = [fitnessMap for i in xrange(NUM_POP / 2)]
 		# args2 = [accumulatedFitnessList for i in xrange(NUM_POP / 2)]
 		args = [(fitnessMap, accumulatedFitnessList) for i in xrange(NUM_POP / 2)]
-		routes = list(itertools.chain.from_iterable(pool.map(worker, args)))
+		results = list(itertools.chain.from_iterable(pool.map(worker, args)))
+		routes = [t[0] for t in results]
+		durationMap = {t[0]:t[1] for t in results}
 
 		if USE_ELITISM:
 			routes.append(bestRoute)
@@ -215,9 +229,12 @@ def ga():
 	# print '\n'.join(stats)
 	# print stats[-1]
 	# print [CAPITALS[i] for i in bestRoute]
-	return time.time() - startTime
+
 	pool.close()
 	pool.join()
+
+	# print time.time() - startTime
+	return time.time() - startTime
 
 def worker(args):
 	fitnessMap = args[0]
@@ -233,14 +250,15 @@ def worker(args):
 	offspring2 = offspring[1]
 	mutate(offspring1)
 	mutate(offspring2)
-	return (offspring1, offspring2)
+	return ((deDup(offspring1), calcDuration(offspring1)), (deDup(offspring2), calcDuration(offspring2)))
 
 NUMBER_OF_TESTS = 20
 def test():
 	totalTime = 0
-	for i in xrange(NUMBER_OF_TESTS):
-		totalTime += ga()
-	print totalTime / NUMBER_OF_TESTS
+	testResults = [ga() for i in xrange(NUMBER_OF_TESTS)]
+	print 'For', NUMBER_OF_TESTS, 'tests:'
+	print 'mean:', numpy.mean(testResults)
+	print 'std:', numpy.std(testResults)
 
 #test()
 ga() 
