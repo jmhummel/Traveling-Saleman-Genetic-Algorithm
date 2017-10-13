@@ -161,8 +161,8 @@ def mutate(chromosome):
 		chromosome = list(reversed(chromosome[:length])) + chromosome[length:]
 
 ITERATIONS = 100000
-MAX_DURATION = 2000000
-# MAX_DURATION = 0
+# MAX_DURATION = 2000000
+MAX_DURATION = 0
 
 def ga():
 	startTime = time.time()
