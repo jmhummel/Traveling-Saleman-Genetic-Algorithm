@@ -176,6 +176,8 @@ def ga():
 	startTime = time.time()
 	bestRoute = None
 	bestDur = 0
+	secondBestRoute = None
+	secondBestDur = 0
 	routes = init()
 	stats = []
 	loop = 0
@@ -199,6 +201,7 @@ def ga():
 		if (USE_STOCHASTIC_SELECT):
 			accumulatedFitnessList = None
 			shortestRoute = min(durationMap.items(), key=operator.itemgetter(1))[0]
+			secondShortestRoute = sorted(durationMap.items(), key=operator.itemgetter(1))[1][0]
 		else:
 			accumulatedFitnessList = calcAccumulatedFitness(fitnessMap)
 			shortestRoute = accumulatedFitnessList[0][0]
@@ -211,6 +214,10 @@ def ga():
 			# stats.append(str(bestRoute) + ' ' + str(bestDur) + ' ' + str(averageDuration) + ' ' + str(loop) + ' ' + str(time.time() - startTime))
 			stats.append(str(bestDur) + '\t' + str(bestRoute) + '\t' + str(averageDuration) + '\t' + str(loop) + '\t' + str(time.time() - startTime))
 			print stats[-1]
+
+		if (secondBestRoute is None or durationMap[secondShortestRoute] < secondBestDur):
+			secondBestRoute = secondShortestRoute
+			secondBestDur = durationMap[secondBestRoute]
 		
 		# print '\n'.join(stats)
 		
@@ -224,6 +231,9 @@ def ga():
 
 		if USE_ELITISM:
 			routes.append(bestRoute)
+			durationMap[bestRoute] = bestDur
+			routes.append(secondBestRoute)
+			durationMap[secondBestRoute] = secondBestDur
 
 		loop += 1
 	# print '\n'.join(stats)
