@@ -224,6 +224,7 @@ def ga():
 
 		if USE_ELITISM:
 			routes.append(bestRoute)
+			durationMap[bestRoute] = bestDur
 
 		loop += 1
 	# print '\n'.join(stats)
