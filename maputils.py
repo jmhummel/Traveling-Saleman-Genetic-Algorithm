@@ -2,6 +2,7 @@ import pickle
 import math
 import polyline
 import yaml
+import random
 
 geoCache        = pickle.load(open('geoCache.p', 'rb'))
 directionsCache = pickle.load(open('directions.p','rb'))
@@ -77,63 +78,36 @@ def drawLeg(place1, place2, m):
 
 	m.drawgreatcircle(location1[1], location1[0], location2[1], location2[0], color='#0000ff80')
 
-def drawRoute(route, m):
+def drawRoute(route, plt):
 	list1 = route
 	list2 = route[1:] + route[:1]
 	legs = zip(list1, list2)
 	for leg in legs:
 		place1 = CAPITALS[leg[0]]
 		place2 = CAPITALS[leg[1]]
-		drawLeg(place1, place2, m)
+		plt.plot([place1[0], place2[0]], [place1[1],place2[1]], color='r', marker = 'o')
 
-CAPITALS = [
-	'Montgomery,AL',
-	'Juneau,AK',
-	'Phoenix,AZ',
-	'Little Rock,AR',
-	'Sacramento,CA',
-	'Denver,CO',
-	'Hartford,CT',
-	'Dover,DE',
-	'Tallahassee,FL',
-	'Atlanta,GA',
-	'Boise,ID',
-	'Springfield,IL',
-	'Indianapolis,IN',
-	'Des Moines,IA',
-	'Topeka,KS',
-	'Frankfort,KY',
-	'Baton Rouge,LA',
-	'Augusta,ME',
-	'Annapolis,MD',
-	'Boston,MA',
-	'Lansing,MI',
-	'St. Paul,MN',
-	'Jackson,MS',
-	'Jefferson City,MO',
-	'Helena,MT',
-	'Lincoln,NE',
-	'Carson City,NV',
-	'Concord,NH',
-	'Trenton,NJ',
-	'Santa Fe,NM',
-	'Albany,NY',
-	'Raleigh,NC',
-	'Bismarck,ND',
-	'Columbus,OH',
-	'Oklahoma City,OK',
-	'Salem,OR',
-	'Harrisburg,PA',
-	'Providence,RI',
-	'Columbia,SC',
-	'Pierre,SD',
-	'Nashville,TN',
-	'Austin,TX',
-	'Salt Lake City,UT',
-	'Montpelier,VT',
-	'Richmond,VA',
-	'Olympia,WA',
-	'Charleston,WV',
-	'Madison,WI',
-	'Cheyenne,WY',
-]
+# CAPITALS = [
+# 	(60, 200),
+# 	(180, 200),
+# 	(80, 180),
+# 	(140, 180),
+# 	(20, 160),
+# 	(100, 160),
+# 	(200, 160),
+# 	(140, 140),
+# 	(40, 120),
+# 	(100, 120),
+# 	(180, 100),
+# 	(60, 80),
+# 	(120, 80),
+# 	(180, 60),
+# 	(20, 40),
+# 	(100, 40),
+# 	(200, 40),
+# 	(20, 20),
+# 	(60, 20),
+# 	(160, 20)
+# ]
+
+CAPITALS = [(random.randint(1,200), random.randint(1,200)) for i in xrange(50)]
