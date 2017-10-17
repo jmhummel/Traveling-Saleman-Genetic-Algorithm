@@ -5,6 +5,9 @@ import random
 import operator
 import time
 import sys
+import itertools
+import numpy
+import math
 
 import maputils
 
@@ -13,16 +16,12 @@ USE_ELITISM = True
 
 CAPITALS = maputils.CAPITALS
  
-cachedDistDur = pickle.load(open('cache.p', 'r'))
+# cachedDistDur = pickle.load(open('cache.p', 'r'))
 
 def getDistDur(origin, destination):
-	# print origin, destination
-	key = tuple(sorted([origin, destination]))
-	if key in cachedDistDur:
-		# print origin, destination, 'from cache'
-		return cachedDistDur[key]
-	else:
-		raise Exception('Not found in cache') 
+	xDistance = abs(origin[0] - destination[0])
+	yDistance = abs(origin[1] - destination[1])
+	return math.sqrt(xDistance**2 + yDistance**2)
 
 NUM_POP = 100
 NUM_SEEDS = NUM_POP
@@ -55,7 +54,7 @@ def calcDuration(route):
 	for leg in legs:
 		point1 = CAPITALS[leg[0]]
 		point2 = CAPITALS[leg[1]]
-		totalDur += getDistDur(point1, point2)[1]
+		totalDur += getDistDur(point1, point2)
 	# cachedRouteDur[route] = totalDur
 	# print totalDur, route
 	return totalDur
