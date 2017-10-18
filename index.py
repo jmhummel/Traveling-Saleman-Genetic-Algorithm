@@ -19,9 +19,11 @@ CAPITALS = maputils.CAPITALS
 # cachedDistDur = pickle.load(open('cache.p', 'r'))
 
 def getDistDur(origin, destination):
-	xDistance = abs(origin[0] - destination[0])
-	yDistance = abs(origin[1] - destination[1])
-	return math.sqrt(xDistance**2 + yDistance**2)
+	xDistance = origin[0] - destination[0]
+	yDistance = origin[1] - destination[1]
+	dist = math.sqrt(xDistance**2 + yDistance**2)
+
+	return dist
 
 NUM_POP = 100
 NUM_SEEDS = NUM_POP
@@ -36,11 +38,12 @@ def init():
 	return seeds
 
 def deDup(route):
+	route = tuple(route)
 	idx = route.index(0)
 	route = route[idx:] + route[:idx]
 	if route[-1] < route[1]:
-		return tuple(route[:1] + list(reversed(route[1:])))
-	return tuple(route)
+		return route[:1] + tuple(reversed(route[1:]))
+	return route
 
 def calcDuration(route):
 	route = tuple(route)

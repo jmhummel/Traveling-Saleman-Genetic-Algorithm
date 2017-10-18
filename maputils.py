@@ -110,4 +110,4 @@ def drawRoute(route, plt):
 # 	(160, 20)
 # ]
 
-CAPITALS = [(random.randint(1,200), random.randint(1,200)) for i in xrange(50)]
+CAPITALS = [(random.randint(1,200), random.randint(1,200)) for i in xrange(8)]
